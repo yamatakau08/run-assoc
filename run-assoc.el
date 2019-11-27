@@ -64,11 +64,15 @@
 (defvar associated-program-alist nil
   "Associated program/function list depending on file name regexp.")
 
-(defun run-associated-program (file-name-arg)
+(defun run-associated-program (file-name-arg &optional wildcards) ; add optional arg to use interactive block of find-file function, actually no used
   "Run program or function associated with file-name-arg.
       If no application is associated with file, then `find-file'."
-  (interactive "ffile:")
-  (let ((items associated-program-alist) 
+  ;; modified to use same interactive block of find-file function.
+  ;; because C-x C-f assigned run-associated-program original (interactive "ffile:") can't handle directory correctly inside buffer of file.
+  (interactive
+   (find-file-read-args "Find file: "
+                        (confirm-nonexistent-file-or-buffer)))
+  (let ((items associated-program-alist)
 	item
 	program
 	regexp
@@ -83,21 +87,29 @@
 	  (cond ((stringp program)
 		 (setq result (start-process program nil program file-name)))
 		((functionp program)
-		 (funcall program file-name)
+		 (funcall program
+			  (replace-regexp-in-string "/" "\\\\" file-name) ; modified to change windows path to internal one
+			  )
 		 ;; This implementation assumes everything went well,
 		 ;; or that the called function handled an error by
 		 ;; itself:
 		 (setq result t))))
       (setq items (cdr items)))
     ;; fail to run
-    (unless result (find-file file))))
+    (unless result
+      (find-file file-name) ; modified to use "file-name" as arg, original arg is "file" is not defined
+      )))
 
 (defun dired-run-associated-program ()
   "Run program or function associated with current line's file.
       If file is a directory, then `dired-find-file' instead.  If no
       application is associated with file, then `find-file'."
   (interactive)
-  (run-associated-program (dired-get-filename)))
+  (run-associated-program
+   ;; modified to use 'dired-get-file-for-visit, original is 'dired-get-filename.
+   ;; because dired-get-file-name has error when select '.' or '..' in dired mode
+   (dired-get-file-for-visit)
+   ))
 
 (eval-after-load "dired"
   '(progn
