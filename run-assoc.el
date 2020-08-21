@@ -87,9 +87,10 @@
 	  (cond ((stringp program)
 		 (setq result (start-process program nil program file-name)))
 		((functionp program)
-		 (funcall program
-			  (replace-regexp-in-string "/" "\\\\" file-name) ; modified to change windows path to internal one
-			  )
+;		 (funcall program
+;			  (replace-regexp-in-string "/" "\\\\" file-name) ; modified to change windows path to internal one
+;			  )
+		 (funcall program file-name)
 		 ;; This implementation assumes everything went well,
 		 ;; or that the called function handled an error by
 		 ;; itself:
