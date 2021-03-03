@@ -98,7 +98,7 @@
       (setq items (cdr items)))
     ;; fail to run
     (unless result
-      (find-file file-name) ; modified to use "file-name" as arg, original arg is "file" is not defined
+      (find-file file-name) ; modified to use "file-name" as arg, original arg is "file" is nill with calling this func directry means without interactive call
       )))
 
 (defun dired-run-associated-program ()
